@@ -7,4 +7,5 @@ pub mod ram;
 pub enum MMC {
     #[default]
     RAM,
+    ROM,
 }

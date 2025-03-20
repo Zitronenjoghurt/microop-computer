@@ -1,3 +1,13 @@
+/// Micro-Op Specific Registers
+pub const TMP0: u8 = 32;
+pub const TMP1: u8 = 33;
+pub const TMP2: u8 = 34;
+pub const TMP3: u8 = 35;
+pub const TMP4: u8 = 36;
+pub const TMP5: u8 = 37;
+pub const TMP6: u8 = 38;
+pub const TMP7: u8 = 39;
+
 #[derive(Debug, Default, PartialEq)]
 pub struct CPURegisters {
     /// x1 -> Return address
@@ -42,6 +52,8 @@ pub struct CPURegisters {
     t4: u64,
     t5: u64,
     t6: u64,
+    /// Micro-Op tmp registers (not part of RISC-V)
+    tmp: [u64; 8],
 }
 
 impl CPURegistersAccessTrait for CPURegisters {
@@ -59,7 +71,7 @@ pub trait CPURegistersAccessTrait {
     fn get_registers_mut(&mut self) -> &mut CPURegisters;
 
     fn get_register(&self, index: u8) -> u64 {
-        match index & 0b0001_1111 {
+        match index {
             0 => 0,
             1 => self.get_ra(),
             2 => self.get_sp(),
@@ -92,7 +104,7 @@ pub trait CPURegistersAccessTrait {
             29 => self.get_t4(),
             30 => self.get_t5(),
             31 => self.get_t6(),
-            _ => unreachable!(),
+            _ => self.get_tmp((index - 31) as usize),
         }
     }
 
@@ -130,7 +142,7 @@ pub trait CPURegistersAccessTrait {
             29 => self.set_t4(value),
             30 => self.set_t5(value),
             31 => self.set_t6(value),
-            _ => unreachable!(),
+            _ => self.set_tmp((index - 31) as usize, value),
         }
     }
 
@@ -380,5 +392,13 @@ pub trait CPURegistersAccessTrait {
 
     fn set_t6(&mut self, value: u64) {
         self.get_registers_mut().t6 = value;
+    }
+
+    fn get_tmp(&self, index: usize) -> u64 {
+        self.get_registers().tmp[index]
+    }
+
+    fn set_tmp(&mut self, index: usize, value: u64) {
+        self.get_registers_mut().tmp[index] = value;
     }
 }

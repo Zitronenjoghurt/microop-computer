@@ -35,15 +35,17 @@ impl CPU {
             MicroOp::Stall => MicroOpResponse::default(),
             MicroOp::BusWritePC => self.mo_bus_write_pc(bus),
             MicroOp::BusReadIR => self.mo_bus_read_ir(bus),
+            MicroOp::IncrementPC => todo!(),
             MicroOp::BusRelease => self.mo_bus_release(bus),
             MicroOp::BusTake => self.mo_bus_take(bus),
-            MicroOp::BusReadData(register) => self.mo_bus_read_data(bus, register),
+            MicroOp::BusReadByte(register) => self.mo_bus_read_byte(bus, register),
             MicroOp::BusWriteAddress(register) => self.mo_bus_write_address(bus, register),
             MicroOp::BusWriteData(register) => self.mo_bus_write_data(bus, register),
             MicroOp::BusSetRead => self.mo_bus_set_read(bus),
             MicroOp::BusSetWrite => self.mo_bus_set_write(bus),
             MicroOp::Decode => self.mo_decode(),
-            MicroOp::ALUAdd(rd, rs1, rs2) => todo!(),
+            MicroOp::ALUAdd(rd, rs1, rs2) => self.mo_alu_add(rd, rs1, rs2),
+            MicroOp::RegisterLoadImm(register, imm) => self.mo_register_load_imm(register, imm),
         };
 
         if response.repeat {
@@ -91,8 +93,8 @@ impl CPU {
         MicroOpResponse::default()
     }
 
-    fn mo_bus_read_data(&mut self, bus: &Bus, register: u8) -> MicroOpResponse {
-        let data = bus.get_data();
+    fn mo_bus_read_byte(&mut self, bus: &Bus, register: u8) -> MicroOpResponse {
+        let data = (bus.get_data() & 0xFF) as i8 as i64 as u64; // Sign extension
         self.set_register(register, data);
         MicroOpResponse::default()
     }
@@ -117,6 +119,11 @@ impl CPU {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
         self.set_register(rd, value1.wrapping_add(value2));
+        MicroOpResponse::default()
+    }
+
+    fn mo_register_load_imm(&mut self, register: u8, imm: u64) -> MicroOpResponse {
+        self.set_register(register, imm);
         MicroOpResponse::default()
     }
 }

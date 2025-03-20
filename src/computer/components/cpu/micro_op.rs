@@ -8,12 +8,13 @@ pub enum MicroOp {
     /// Fetch/Decode Ops
     BusWritePC,
     BusReadIR,
+    IncrementPC,
     Decode,
 
     // Bus operations
     BusRelease,
     BusTake,
-    BusReadData(u8),
+    BusReadByte(u8),
     BusWriteAddress(u8),
     BusWriteData(u8),
     BusSetRead,
@@ -22,6 +23,9 @@ pub enum MicroOp {
     // ALU operations
     /// rd, rs1, rs2
     ALUAdd(u8, u8, u8),
+
+    // Register operations
+    RegisterLoadImm(u8, u64),
 }
 
 impl MicroOp {

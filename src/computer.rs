@@ -23,6 +23,7 @@ impl Computer {
         if let Some(mmc) = self.bus.get_active_mmc() {
             match mmc {
                 MMC::RAM => self.ram.process_bus(&mut self.bus),
+                MMC::ROM => unimplemented!(),
             }
         }
     }
