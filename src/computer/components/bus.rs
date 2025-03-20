@@ -1,5 +1,6 @@
 use crate::computer::components::bus::owner::BusOwner;
 use crate::computer::components::bus::status::BusStatus;
+use crate::computer::components::MMC;
 
 pub mod owner;
 pub mod status;
@@ -10,6 +11,7 @@ pub struct Bus {
     data: u64,
     owner: BusOwner,
     status: BusStatus,
+    device_regions: (u64, u64, MMC),
 }
 
 impl Bus {
@@ -71,5 +73,20 @@ impl Bus {
 
     pub fn get_data(&self) -> u64 {
         self.data
+    }
+
+    pub fn get_status(&self) -> BusStatus {
+        self.status
+    }
+
+    pub fn get_active_mmc(&self) -> Option<MMC> {
+        if self.status == BusStatus::Idle {
+            return None;
+        }
+        return Some(MMC::RAM);
+    }
+
+    pub fn force_put_data(&mut self, data: u64) {
+        self.put_data(data, self.owner);
     }
 }

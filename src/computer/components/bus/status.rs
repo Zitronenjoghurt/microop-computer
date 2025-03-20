@@ -4,5 +4,4 @@ pub enum BusStatus {
     Idle,
     Read,
     Write,
-    Wait,
 }

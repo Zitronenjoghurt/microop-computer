@@ -1,5 +1,7 @@
 use crate::computer::components::bus::Bus;
 use crate::computer::components::cpu::CPU;
+use crate::computer::components::ram::RAM;
+use crate::computer::components::MMC;
 
 mod components;
 
@@ -7,6 +9,7 @@ mod components;
 pub struct Computer {
     bus: Bus,
     cpu: CPU,
+    ram: RAM,
 }
 
 impl Computer {
@@ -16,5 +19,11 @@ impl Computer {
 
     pub fn tick(&mut self) {
         self.cpu.tick(&mut self.bus);
+
+        if let Some(mmc) = self.bus.get_active_mmc() {
+            match mmc {
+                MMC::RAM => self.ram.process_bus(&mut self.bus),
+            }
+        }
     }
 }
