@@ -3,7 +3,8 @@ use crate::computer::components::cpu::CPU;
 use crate::computer::components::ram::RAM;
 use crate::computer::components::MMC;
 
-mod components;
+pub mod components;
+pub mod instructions;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Computer {

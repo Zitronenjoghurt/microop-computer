@@ -1,5 +1,6 @@
 use crate::computer::components::bus::status::BusStatus;
 use crate::computer::components::bus::Bus;
+use crate::utils::bit_operations::construct_u32;
 use std::collections::HashMap;
 
 const PAGE_SIZE: usize = 4096;
@@ -38,12 +39,11 @@ impl RAM {
     }
 
     pub fn read32(&self, address: u64) -> u32 {
-        let b0 = self.read_byte(address) as u32;
-        let b1 = self.read_byte(address.wrapping_add(1)) as u32;
-        let b2 = self.read_byte(address.wrapping_add(2)) as u32;
-        let b3 = self.read_byte(address.wrapping_add(3)) as u32;
-
-        b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
+        let b0 = self.read_byte(address);
+        let b1 = self.read_byte(address.wrapping_add(1));
+        let b2 = self.read_byte(address.wrapping_add(2));
+        let b3 = self.read_byte(address.wrapping_add(3));
+        construct_u32(b0, b1, b2, b3)
     }
 
     pub fn read64(&self, address: u64) -> u64 {

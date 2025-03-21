@@ -1,3 +1,4 @@
+use crate::computer::components::cpu::registers::CPUReg;
 use std::collections::VecDeque;
 
 #[derive(Debug, Default, PartialEq)]
@@ -14,18 +15,18 @@ pub enum MicroOp {
     // Bus operations
     BusRelease,
     BusTake,
-    BusReadByte(u8),
-    BusWriteAddress(u8),
-    BusWriteData(u8),
+    BusReadByte(CPUReg),
+    BusWriteAddress(CPUReg),
+    BusWriteData(CPUReg),
     BusSetRead,
     BusSetWrite,
 
     // ALU operations
     /// rd, rs1, rs2
-    ALUAdd(u8, u8, u8),
+    ALUAdd(CPUReg, CPUReg, CPUReg),
 
     // Register operations
-    RegisterLoadImm(u8, u64),
+    RegisterLoadImm(CPUReg, u64),
 }
 
 impl MicroOp {

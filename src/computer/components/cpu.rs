@@ -1,14 +1,14 @@
-mod decode;
-mod micro_op;
-mod registers;
-
 use crate::computer::components::bus::owner::BusOwner;
 use crate::computer::components::bus::status::BusStatus;
 use crate::computer::components::bus::Bus;
-use crate::computer::components::cpu::decode::decode_instruction;
+use crate::computer::components::cpu::decompose::decompose_instruction;
 use crate::computer::components::cpu::micro_op::{MicroOp, MicroOpResponse};
-use crate::computer::components::cpu::registers::{CPURegisters, CPURegistersAccessTrait};
+use crate::computer::components::cpu::registers::{CPUReg, CPURegisters, CPURegistersAccessTrait};
 use std::collections::VecDeque;
+
+mod decompose;
+mod micro_op;
+pub mod registers;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct CPU {
@@ -81,19 +81,19 @@ impl CPU {
         }
     }
 
-    fn mo_bus_write_address(&mut self, bus: &mut Bus, register: u8) -> MicroOpResponse {
+    fn mo_bus_write_address(&mut self, bus: &mut Bus, register: CPUReg) -> MicroOpResponse {
         // Failed write operations will be ignored
         bus.put_address(self.get_register(register), BusOwner::CPU);
         MicroOpResponse::default()
     }
 
-    fn mo_bus_write_data(&mut self, bus: &mut Bus, register: u8) -> MicroOpResponse {
+    fn mo_bus_write_data(&mut self, bus: &mut Bus, register: CPUReg) -> MicroOpResponse {
         // Failed write operations will be ignored
         bus.put_data(self.get_register(register), BusOwner::CPU);
         MicroOpResponse::default()
     }
 
-    fn mo_bus_read_byte(&mut self, bus: &Bus, register: u8) -> MicroOpResponse {
+    fn mo_bus_read_byte(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = (bus.get_data() & 0xFF) as i8 as i64 as u64; // Sign extension
         self.set_register(register, data);
         MicroOpResponse::default()
@@ -110,19 +110,19 @@ impl CPU {
     }
 
     fn mo_decode(&mut self) -> MicroOpResponse {
-        let instruction_queue = decode_instruction(self.ir);
+        let instruction_queue = decompose_instruction(self.ir);
         self.micro_op_queue = VecDeque::from(instruction_queue);
         MicroOpResponse::default()
     }
 
-    fn mo_alu_add(&mut self, rd: u8, rs1: u8, rs2: u8) -> MicroOpResponse {
+    fn mo_alu_add(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
         self.set_register(rd, value1.wrapping_add(value2));
         MicroOpResponse::default()
     }
 
-    fn mo_register_load_imm(&mut self, register: u8, imm: u64) -> MicroOpResponse {
+    fn mo_register_load_imm(&mut self, register: CPUReg, imm: u64) -> MicroOpResponse {
         self.set_register(register, imm);
         MicroOpResponse::default()
     }
