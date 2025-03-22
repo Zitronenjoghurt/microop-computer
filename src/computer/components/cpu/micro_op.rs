@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 pub enum MicroOp {
     #[default]
     Stall,
+    Halt,
     /// Decodes the instruction in the instruction register and decomposes it to micro operations
     Decode,
 
@@ -18,7 +19,10 @@ pub enum MicroOp {
     BusWriteAddress(CPUReg),
     BusWriteData(CPUReg),
     BusSetRead,
-    BusSetWrite,
+    BusSetWriteByte,
+    BusSetWriteHalfWord,
+    BusSetWriteWord,
+    BusSetWriteDoubleWord,
 
     // ALU operations
     /// rd, rs1, rs2
@@ -46,12 +50,20 @@ impl MicroOp {
 #[derive(Debug, Default, PartialEq)]
 pub struct MicroOpResponse {
     pub repeat: bool,
+    pub halt: bool,
 }
 
 impl MicroOpResponse {
     pub fn new_repeat() -> Self {
         Self {
             repeat: true,
+            ..Default::default()
+        }
+    }
+
+    pub fn new_halt() -> Self {
+        Self {
+            halt: true,
             ..Default::default()
         }
     }

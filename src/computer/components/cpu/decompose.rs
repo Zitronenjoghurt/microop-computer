@@ -7,6 +7,8 @@ pub fn decompose_instruction(instruction_bits: u32) -> Vec<MicroOp> {
     match instruction {
         Instruction::Add(rd, rs1, rs2) => decompose_add(rd, rs1, rs2),
         Instruction::Lb(rd, rs1, imm) => decompose_lb(rd, rs1, imm),
+        Instruction::ECall => vec![MicroOp::Halt],
+        Instruction::EBreak => vec![MicroOp::Halt],
     }
 }
 

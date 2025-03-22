@@ -5,6 +5,8 @@ pub fn encode_instruction(instruction: &Instruction) -> u32 {
     match instruction {
         Instruction::Add(rd, rs1, rs2) => encode_r_type(0x00, *rs2, *rs1, 0x0, *rd, 0b0011_0011),
         Instruction::Lb(rd, rs1, imm) => encode_i_type(*imm, *rs1, 0x0, *rd, 0b0000_0011),
+        Instruction::ECall => encode_i_type(0x0, 0u8.into(), 0x0, 0u8.into(), 0b111_0011),
+        Instruction::EBreak => encode_i_type(0x1, 0u8.into(), 0x0, 0u8.into(), 0b111_0011),
     }
 }
 

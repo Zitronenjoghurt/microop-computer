@@ -1,3 +1,4 @@
+use crate::computer::address::{Address, BOOT_ROM_END, BOOT_ROM_START};
 use crate::computer::components::bus::owner::BusOwner;
 use crate::computer::components::bus::status::BusStatus;
 use crate::computer::components::MMC;
@@ -7,11 +8,10 @@ pub mod status;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct Bus {
-    address: u64,
+    address: Address,
     data: u64,
     owner: BusOwner,
     status: BusStatus,
-    device_regions: (u64, u64, MMC),
 }
 
 impl Bus {
@@ -43,7 +43,7 @@ impl Bus {
         true
     }
 
-    pub fn put_address(&mut self, address: u64, source: BusOwner) -> bool {
+    pub fn put_address(&mut self, address: Address, source: BusOwner) -> bool {
         if source != self.owner {
             return false;
         }
@@ -67,7 +67,7 @@ impl Bus {
         true
     }
 
-    pub fn get_address(&self) -> u64 {
+    pub fn get_address(&self) -> Address {
         self.address
     }
 
@@ -83,7 +83,11 @@ impl Bus {
         if self.status == BusStatus::Idle {
             return None;
         }
-        return Some(MMC::RAM);
+
+        match self.get_address().value() {
+            BOOT_ROM_START..=BOOT_ROM_END => Some(MMC::ROM),
+            _ => Some(MMC::RAM),
+        }
     }
 
     pub fn force_put_data(&mut self, data: u64) {

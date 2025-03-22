@@ -1,3 +1,5 @@
+use std::fmt::{Display, Formatter};
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CPUReg {
     // RISC-V integer registers
@@ -151,5 +153,24 @@ impl From<usize> for CPUReg {
 impl From<u8> for CPUReg {
     fn from(value: u8) -> Self {
         CPUReg::from(value as usize)
+    }
+}
+
+impl Display for CPURegisters {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "RISC-V Registers:")?;
+        for i in 0..32 {
+            writeln!(f, "X{:<2}: {}", i, self.registers[i])?;
+        }
+
+        writeln!(f, "\nSpecial Registers:")?;
+        writeln!(f, "PC  : {}", self.registers[32])?;
+        writeln!(f, "IR  : {:032b}", self.registers[33] as u32)?;
+        for i in 0..8 {
+            let index = 34 + i;
+            writeln!(f, "TMP{}: {}", i, self.registers[index])?;
+        }
+
+        Ok(())
     }
 }

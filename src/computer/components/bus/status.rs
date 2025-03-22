@@ -3,5 +3,8 @@ pub enum BusStatus {
     #[default]
     Idle,
     Read,
-    Write,
+    WriteByte,
+    WriteHalfWord,
+    WriteWord,
+    WriteDoubleWord,
 }

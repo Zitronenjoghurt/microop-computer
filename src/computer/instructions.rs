@@ -11,6 +11,8 @@ pub enum Instruction {
     Add(CPUReg, CPUReg, CPUReg),
     /// rd, rs1, imm
     Lb(CPUReg, CPUReg, u64),
+    ECall,
+    EBreak,
 }
 
 impl Instruction {

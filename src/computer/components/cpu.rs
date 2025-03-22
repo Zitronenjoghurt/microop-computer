@@ -1,8 +1,10 @@
+use crate::computer::address::Address;
 use crate::computer::components::bus::owner::BusOwner;
 use crate::computer::components::bus::status::BusStatus;
 use crate::computer::components::bus::Bus;
 use crate::computer::components::cpu::decompose::decompose_instruction;
 use crate::computer::components::cpu::micro_op::{MicroOp, MicroOpResponse};
+use crate::computer::components::cpu::registers::CPUReg::IR;
 use crate::computer::components::cpu::registers::{CPUReg, CPURegisters, CPURegistersAccessTrait};
 use std::collections::VecDeque;
 
@@ -13,10 +15,6 @@ pub mod registers;
 #[derive(Debug, Default, PartialEq)]
 pub struct CPU {
     registers: CPURegisters,
-    /// Program counter
-    pc: u64,
-    /// Instruction register
-    ir: u32,
     micro_op_queue: VecDeque<MicroOp>,
 }
 
@@ -25,7 +23,7 @@ impl CPU {
         CPU::default()
     }
 
-    pub fn tick(&mut self, bus: &mut Bus) {
+    pub fn tick(&mut self, bus: &mut Bus) -> bool {
         if self.micro_op_queue.is_empty() {
             self.micro_op_queue = MicroOp::default_queue()
         }
@@ -33,6 +31,7 @@ impl CPU {
         let micro_op = self.micro_op_queue.pop_front().unwrap();
         let response = match micro_op {
             MicroOp::Stall => MicroOpResponse::default(),
+            MicroOp::Halt => MicroOpResponse::new_halt(),
             MicroOp::BusRelease => self.mo_bus_release(bus),
             MicroOp::BusTake => self.mo_bus_take(bus),
             MicroOp::BusReadByte(register) => self.mo_bus_read_byte(bus, register),
@@ -42,7 +41,10 @@ impl CPU {
             MicroOp::BusWriteAddress(register) => self.mo_bus_write_address(bus, register),
             MicroOp::BusWriteData(register) => self.mo_bus_write_data(bus, register),
             MicroOp::BusSetRead => self.mo_bus_set_read(bus),
-            MicroOp::BusSetWrite => self.mo_bus_set_write(bus),
+            MicroOp::BusSetWriteByte => self.mo_bus_set_write_byte(bus),
+            MicroOp::BusSetWriteHalfWord => self.mo_bus_set_write_half_word(bus),
+            MicroOp::BusSetWriteWord => self.mo_bus_set_write_word(bus),
+            MicroOp::BusSetWriteDoubleWord => self.mo_bus_set_write_double_word(bus),
             MicroOp::Decode => self.mo_decode(),
             MicroOp::ALUAdd(rd, rs1, rs2) => self.mo_alu_add(rd, rs1, rs2),
             MicroOp::RegisterLoadImm(register, imm) => self.mo_register_load_imm(register, imm),
@@ -50,7 +52,9 @@ impl CPU {
 
         if response.repeat {
             self.micro_op_queue.push_front(micro_op);
-        }
+        };
+
+        !response.halt
     }
 }
 
@@ -72,7 +76,8 @@ impl CPU {
 
     fn mo_bus_write_address(&mut self, bus: &mut Bus, register: CPUReg) -> MicroOpResponse {
         // Failed write operations will be ignored
-        bus.put_address(self.get_register(register), BusOwner::CPU);
+        let address = Address::new(self.get_register(register));
+        bus.put_address(address, BusOwner::CPU);
         MicroOpResponse::default()
     }
 
@@ -111,13 +116,29 @@ impl CPU {
         MicroOpResponse::default()
     }
 
-    fn mo_bus_set_write(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::Write, BusOwner::CPU);
+    fn mo_bus_set_write_byte(&mut self, bus: &mut Bus) -> MicroOpResponse {
+        bus.put_status(BusStatus::WriteByte, BusOwner::CPU);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_set_write_half_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
+        bus.put_status(BusStatus::WriteHalfWord, BusOwner::CPU);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_set_write_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
+        bus.put_status(BusStatus::WriteWord, BusOwner::CPU);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_set_write_double_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
+        bus.put_status(BusStatus::WriteDoubleWord, BusOwner::CPU);
         MicroOpResponse::default()
     }
 
     fn mo_decode(&mut self) -> MicroOpResponse {
-        let instruction_queue = decompose_instruction(self.ir);
+        let instruction = self.get_register(IR) as u32;
+        let instruction_queue = decompose_instruction(instruction);
         self.micro_op_queue = VecDeque::from(instruction_queue);
         MicroOpResponse::default()
     }
