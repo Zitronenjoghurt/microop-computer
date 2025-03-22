@@ -1,8 +1,9 @@
 use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::instructions::decode::decode_instruction;
 use crate::computer::instructions::encode::encode_instruction;
 
-pub mod decode;
-pub mod encode;
+mod decode;
+mod encode;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Instruction {
@@ -15,6 +16,10 @@ pub enum Instruction {
 impl Instruction {
     pub fn encode(&self) -> u32 {
         encode_instruction(&self)
+    }
+
+    pub fn decode(instruction: u32) -> Instruction {
+        decode_instruction(instruction)
     }
 
     pub fn to_byte_vector(&self) -> Vec<u8> {

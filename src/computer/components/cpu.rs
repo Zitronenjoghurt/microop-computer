@@ -33,12 +33,12 @@ impl CPU {
         let micro_op = self.micro_op_queue.pop_front().unwrap();
         let response = match micro_op {
             MicroOp::Stall => MicroOpResponse::default(),
-            MicroOp::BusWritePC => self.mo_bus_write_pc(bus),
-            MicroOp::BusReadIR => self.mo_bus_read_ir(bus),
-            MicroOp::IncrementPC => todo!(),
             MicroOp::BusRelease => self.mo_bus_release(bus),
             MicroOp::BusTake => self.mo_bus_take(bus),
             MicroOp::BusReadByte(register) => self.mo_bus_read_byte(bus, register),
+            MicroOp::BusReadHalfWord(register) => self.mo_bus_read_half_word(bus, register),
+            MicroOp::BusReadWord(register) => self.mo_bus_read_word(bus, register),
+            MicroOp::BusReadDoubleWord(register) => self.mo_bus_read_double_word(bus, register),
             MicroOp::BusWriteAddress(register) => self.mo_bus_write_address(bus, register),
             MicroOp::BusWriteData(register) => self.mo_bus_write_data(bus, register),
             MicroOp::BusSetRead => self.mo_bus_set_read(bus),
@@ -58,17 +58,6 @@ impl CPU {
 impl CPU {
     fn mo_bus_release(&mut self, bus: &mut Bus) -> MicroOpResponse {
         bus.release_ownership(BusOwner::CPU);
-        MicroOpResponse::default()
-    }
-
-    fn mo_bus_write_pc(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_address(self.pc, BusOwner::CPU);
-        MicroOpResponse::default()
-    }
-
-    fn mo_bus_read_ir(&mut self, bus: &Bus) -> MicroOpResponse {
-        let instruction = bus.get_data() as u32;
-        self.ir = instruction;
         MicroOpResponse::default()
     }
 
@@ -95,6 +84,24 @@ impl CPU {
 
     fn mo_bus_read_byte(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = (bus.get_data() & 0xFF) as i8 as i64 as u64; // Sign extension
+        self.set_register(register, data);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_read_half_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
+        let data = (bus.get_data() & 0xFFFF) as i16 as i64 as u64;
+        self.set_register(register, data);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_read_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
+        let data = (bus.get_data() & 0xFFFF_FFFF) as i32 as i64 as u64;
+        self.set_register(register, data);
+        MicroOpResponse::default()
+    }
+
+    fn mo_bus_read_double_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
+        let data = bus.get_data();
         self.set_register(register, data);
         MicroOpResponse::default()
     }

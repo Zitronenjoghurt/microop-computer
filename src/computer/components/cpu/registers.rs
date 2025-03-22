@@ -1,68 +1,6 @@
-#[derive(Debug, Default, PartialEq)]
-pub struct CPURegisters {
-    /// RISC-V integer registers
-    x: [u64; 31],
-    /// Micro-Op tmp registers (not part of RISC-V)
-    tmp: [u64; 8],
-}
-
-impl CPURegistersAccessTrait for CPURegisters {
-    fn get_registers(&self) -> &CPURegisters {
-        self
-    }
-
-    fn get_registers_mut(&mut self) -> &mut CPURegisters {
-        self
-    }
-}
-
-pub trait CPURegistersAccessTrait {
-    fn get_registers(&self) -> &CPURegisters;
-    fn get_registers_mut(&mut self) -> &mut CPURegisters;
-
-    fn get_register(&self, reg: CPUReg) -> u64 {
-        let index = reg as usize;
-        if index == 0 {
-            0
-        } else if index < 32 {
-            self.get_x(index - 1)
-        } else {
-            self.get_tmp(index - 31)
-        }
-    }
-
-    fn set_register(&mut self, reg: CPUReg, value: u64) {
-        let index = reg as usize;
-        if index == 0 {
-            return;
-        }
-
-        if index < 32 {
-            self.set_x(index - 1, value);
-        } else {
-            self.set_tmp(index - 31, value);
-        }
-    }
-
-    fn get_x(&self, index: usize) -> u64 {
-        self.get_registers().x[index]
-    }
-
-    fn set_x(&mut self, index: usize, value: u64) {
-        self.get_registers_mut().x[index] = value;
-    }
-
-    fn get_tmp(&self, index: usize) -> u64 {
-        self.get_registers().tmp[index]
-    }
-
-    fn set_tmp(&mut self, index: usize, value: u64) {
-        self.get_registers_mut().tmp[index] = value;
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CPUReg {
+    // RISC-V integer registers
     X0 = 0,
     X1 = 1,
     X2 = 2,
@@ -95,14 +33,71 @@ pub enum CPUReg {
     X29 = 29,
     X30 = 30,
     X31 = 31,
-    TMP0 = 32,
-    TMP1 = 33,
-    TMP2 = 34,
-    TMP3 = 35,
-    TMP4 = 36,
-    TMP5 = 37,
-    TMP6 = 38,
-    TMP7 = 39,
+    // Micro-Op specific registers (not RISC-V)
+    /// Program Counter
+    PC = 32,
+    /// Instruction Register
+    IR = 33,
+    TMP0 = 34,
+    TMP1 = 35,
+    TMP2 = 36,
+    TMP3 = 37,
+    TMP4 = 38,
+    TMP5 = 39,
+    TMP6 = 40,
+    TMP7 = 41,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct CPURegisters {
+    registers: [u64; 42],
+}
+
+impl CPURegisters {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl CPURegistersAccessTrait for CPURegisters {
+    fn get_registers(&self) -> &CPURegisters {
+        self
+    }
+
+    fn get_registers_mut(&mut self) -> &mut CPURegisters {
+        self
+    }
+}
+
+impl Default for CPURegisters {
+    fn default() -> Self {
+        Self { registers: [0; 42] }
+    }
+}
+
+pub trait CPURegistersAccessTrait {
+    fn get_registers(&self) -> &CPURegisters;
+    fn get_registers_mut(&mut self) -> &mut CPURegisters;
+
+    fn get_register(&self, reg: CPUReg) -> u64 {
+        let index = reg as usize;
+        self.get_registers().registers[index]
+    }
+
+    fn set_register(&mut self, reg: CPUReg, value: u64) {
+        let index = reg as usize;
+        self.get_registers_mut().registers[index] = value;
+    }
+}
+
+impl CPUReg {
+    pub fn to_riscv(&self) -> u8 {
+        let reg = *self as u8;
+        if reg >= 32 {
+            panic!("Register index '{reg}' does not exist in RISC-V")
+        };
+        reg
+    }
 }
 
 impl From<usize> for CPUReg {

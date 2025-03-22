@@ -1,21 +1,20 @@
-use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::components::cpu::registers::{CPUReg, CPUReg::*};
 use std::collections::VecDeque;
 
 #[derive(Debug, Default, PartialEq)]
 pub enum MicroOp {
     #[default]
     Stall,
-
-    /// Fetch/Decode Ops
-    BusWritePC,
-    BusReadIR,
-    IncrementPC,
+    /// Decodes the instruction in the instruction register and decomposes it to micro operations
     Decode,
 
     // Bus operations
     BusRelease,
     BusTake,
     BusReadByte(CPUReg),
+    BusReadHalfWord(CPUReg),
+    BusReadWord(CPUReg),
+    BusReadDoubleWord(CPUReg),
     BusWriteAddress(CPUReg),
     BusWriteData(CPUReg),
     BusSetRead,
@@ -33,10 +32,12 @@ impl MicroOp {
     pub fn default_queue() -> VecDeque<Self> {
         VecDeque::from(vec![
             Self::BusTake,
-            Self::BusWritePC,
+            Self::BusWriteAddress(PC),
             Self::BusSetRead,
-            Self::BusReadIR,
+            Self::BusReadWord(IR),
             Self::BusRelease,
+            Self::RegisterLoadImm(TMP0, 4),
+            Self::ALUAdd(PC, PC, TMP0),
             Self::Decode,
         ])
     }
