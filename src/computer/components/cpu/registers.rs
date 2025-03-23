@@ -137,14 +137,16 @@ impl From<usize> for CPUReg {
             29 => CPUReg::X29,
             30 => CPUReg::X30,
             31 => CPUReg::X31,
-            32 => CPUReg::TMP0,
-            33 => CPUReg::TMP1,
-            34 => CPUReg::TMP2,
-            35 => CPUReg::TMP3,
-            36 => CPUReg::TMP4,
-            37 => CPUReg::TMP5,
-            38 => CPUReg::TMP6,
-            39 => CPUReg::TMP7,
+            32 => CPUReg::PC,
+            33 => CPUReg::IR,
+            34 => CPUReg::TMP0,
+            35 => CPUReg::TMP1,
+            36 => CPUReg::TMP2,
+            37 => CPUReg::TMP3,
+            38 => CPUReg::TMP4,
+            39 => CPUReg::TMP5,
+            40 => CPUReg::TMP6,
+            41 => CPUReg::TMP7,
             _ => panic!("Invalid register index: {}", value),
         }
     }
@@ -172,5 +174,54 @@ impl Display for CPURegisters {
         }
 
         Ok(())
+    }
+}
+
+impl Display for CPUReg {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CPUReg::X0 => write!(f, "x0"),
+            CPUReg::X1 => write!(f, "x1"),
+            CPUReg::X2 => write!(f, "x2"),
+            CPUReg::X3 => write!(f, "x3"),
+            CPUReg::X4 => write!(f, "x4"),
+            CPUReg::X5 => write!(f, "x5"),
+            CPUReg::X6 => write!(f, "x6"),
+            CPUReg::X7 => write!(f, "x7"),
+            CPUReg::X8 => write!(f, "x8"),
+            CPUReg::X9 => write!(f, "x9"),
+            CPUReg::X10 => write!(f, "x10"),
+            CPUReg::X11 => write!(f, "x11"),
+            CPUReg::X12 => write!(f, "x12"),
+            CPUReg::X13 => write!(f, "x13"),
+            CPUReg::X14 => write!(f, "x14"),
+            CPUReg::X15 => write!(f, "x15"),
+            CPUReg::X16 => write!(f, "x16"),
+            CPUReg::X17 => write!(f, "x17"),
+            CPUReg::X18 => write!(f, "x18"),
+            CPUReg::X19 => write!(f, "x19"),
+            CPUReg::X20 => write!(f, "x20"),
+            CPUReg::X21 => write!(f, "x21"),
+            CPUReg::X22 => write!(f, "x22"),
+            CPUReg::X23 => write!(f, "x23"),
+            CPUReg::X24 => write!(f, "x24"),
+            CPUReg::X25 => write!(f, "x25"),
+            CPUReg::X26 => write!(f, "x26"),
+            CPUReg::X27 => write!(f, "x27"),
+            CPUReg::X28 => write!(f, "x28"),
+            CPUReg::X29 => write!(f, "x29"),
+            CPUReg::X30 => write!(f, "x30"),
+            CPUReg::X31 => write!(f, "x31"),
+            CPUReg::PC => write!(f, "PC"),
+            CPUReg::IR => write!(f, "IR"),
+            CPUReg::TMP0 => write!(f, "TMP0"),
+            CPUReg::TMP1 => write!(f, "TMP1"),
+            CPUReg::TMP2 => write!(f, "TMP2"),
+            CPUReg::TMP3 => write!(f, "TMP3"),
+            CPUReg::TMP4 => write!(f, "TMP4"),
+            CPUReg::TMP5 => write!(f, "TMP5"),
+            CPUReg::TMP6 => write!(f, "TMP6"),
+            CPUReg::TMP7 => write!(f, "TMP7"),
+        }
     }
 }

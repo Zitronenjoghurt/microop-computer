@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 // Inclusive ranges
 pub const BOOT_ROM_START: u64 = 0x0000_0000_0000_0000;
 pub const BOOT_ROM_END: u64 = 0x0000_0000_0000_1000;
@@ -23,5 +25,11 @@ impl Address {
             panic!("Invalid boot rom offset {offset}, boot rom only has a size of {BOOT_ROM_SIZE}")
         };
         Self::new(BOOT_ROM_START + offset)
+    }
+}
+
+impl Display for Address {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "0x{:016x}", self.0)
     }
 }

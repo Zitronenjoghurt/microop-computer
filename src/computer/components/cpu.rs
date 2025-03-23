@@ -6,6 +6,8 @@ use crate::computer::components::cpu::decompose::decompose_instruction;
 use crate::computer::components::cpu::micro_op::{MicroOp, MicroOpResponse};
 use crate::computer::components::cpu::registers::CPUReg::IR;
 use crate::computer::components::cpu::registers::{CPUReg, CPURegisters, CPURegistersAccessTrait};
+use crate::log_microop_debug;
+use log::{debug, trace};
 use std::collections::VecDeque;
 
 mod decompose;
@@ -16,6 +18,8 @@ pub mod registers;
 pub struct CPU {
     registers: CPURegisters,
     micro_op_queue: VecDeque<MicroOp>,
+    ticks: u64,
+    decode_counter: u64,
 }
 
 impl CPU {
@@ -24,14 +28,17 @@ impl CPU {
     }
 
     pub fn tick(&mut self, bus: &mut Bus) -> bool {
+        trace!(target: "cpu", "Tick {}", self.ticks);
+
         if self.micro_op_queue.is_empty() {
-            self.micro_op_queue = MicroOp::default_queue()
+            self.micro_op_queue = MicroOp::default_queue();
+            debug!(target: "cpu", "New Fetch/Decode Cycle")
         }
 
         let micro_op = self.micro_op_queue.pop_front().unwrap();
         let response = match micro_op {
-            MicroOp::Stall => MicroOpResponse::default(),
-            MicroOp::Halt => MicroOpResponse::new_halt(),
+            MicroOp::Stall => self.mo_stall(),
+            MicroOp::Halt => self.mo_halt(),
             MicroOp::BusRelease => self.mo_bus_release(bus),
             MicroOp::BusTake => self.mo_bus_take(bus),
             MicroOp::BusReadByte(register) => self.mo_bus_read_byte(bus, register),
@@ -54,22 +61,37 @@ impl CPU {
             self.micro_op_queue.push_front(micro_op);
         };
 
+        self.ticks = self.ticks.wrapping_add(1);
+
         !response.halt
     }
 }
 
 /// Micro operations
 impl CPU {
+    fn mo_stall(&self) -> MicroOpResponse {
+        log_microop_debug!("stall", "Stalling");
+        MicroOpResponse::default()
+    }
+
+    fn mo_halt(&self) -> MicroOpResponse {
+        log_microop_debug!("halt", "Halting");
+        MicroOpResponse::new_halt()
+    }
+
     fn mo_bus_release(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.release_ownership(BusOwner::CPU);
+        let success = bus.release_ownership(BusOwner::CPU);
+        log_microop_debug!("bus_release", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_bus_take(&mut self, bus: &mut Bus) -> MicroOpResponse {
         let success = bus.take_ownership(BusOwner::CPU);
         if success {
+            log_microop_debug!("bus_take", "✔");
             MicroOpResponse::default()
         } else {
+            log_microop_debug!("bus_take", "✘ (rescheduling)");
             MicroOpResponse::new_repeat()
         }
     }
@@ -78,80 +100,105 @@ impl CPU {
         // Failed write operations will be ignored
         let address = Address::new(self.get_register(register));
         bus.put_address(address, BusOwner::CPU);
+        log_microop_debug!("bus_write_address", "{register} → {address}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_write_data(&mut self, bus: &mut Bus, register: CPUReg) -> MicroOpResponse {
         // Failed write operations will be ignored
-        bus.put_data(self.get_register(register), BusOwner::CPU);
+        let value = self.get_register(register);
+        let success = bus.put_data(value, BusOwner::CPU);
+        log_microop_debug!("bus_write_data", "{register} ← {value}; Success: {success}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_read_byte(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = (bus.get_data() & 0xFF) as i8 as i64 as u64; // Sign extension
         self.set_register(register, data);
+        log_microop_debug!("bus_read_byte", "{register} ← {data}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_read_half_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = (bus.get_data() & 0xFFFF) as i16 as i64 as u64;
         self.set_register(register, data);
+        log_microop_debug!("bus_read_half_word", "{register} ← {data}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_read_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = (bus.get_data() & 0xFFFF_FFFF) as i32 as i64 as u64;
         self.set_register(register, data);
+        log_microop_debug!("bus_read_word", "{register} ← {data}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_read_double_word(&mut self, bus: &Bus, register: CPUReg) -> MicroOpResponse {
         let data = bus.get_data();
         self.set_register(register, data);
+        log_microop_debug!("bus_read_word", "{register} ← {data}");
         MicroOpResponse::default()
     }
 
     fn mo_bus_set_read(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::Read, BusOwner::CPU);
+        let success = bus.put_status(BusStatus::Read, BusOwner::CPU);
+        log_microop_debug!("bus_set_read", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_bus_set_write_byte(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::WriteByte, BusOwner::CPU);
+        let success = bus.put_status(BusStatus::WriteByte, BusOwner::CPU);
+        log_microop_debug!("bus_set_write_byte", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_bus_set_write_half_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::WriteHalfWord, BusOwner::CPU);
+        let success = bus.put_status(BusStatus::WriteHalfWord, BusOwner::CPU);
+        log_microop_debug!("bus_set_write_hw", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_bus_set_write_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::WriteWord, BusOwner::CPU);
+        let success = bus.put_status(BusStatus::WriteWord, BusOwner::CPU);
+        log_microop_debug!("bus_set_write_w", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_bus_set_write_double_word(&mut self, bus: &mut Bus) -> MicroOpResponse {
-        bus.put_status(BusStatus::WriteDoubleWord, BusOwner::CPU);
+        let success = bus.put_status(BusStatus::WriteDoubleWord, BusOwner::CPU);
+        log_microop_debug!("bus_set_write_dw", "{}", if success { "✔" } else { "✘" });
         MicroOpResponse::default()
     }
 
     fn mo_decode(&mut self) -> MicroOpResponse {
-        let instruction = self.get_register(IR) as u32;
-        let instruction_queue = decompose_instruction(instruction);
-        self.micro_op_queue = VecDeque::from(instruction_queue);
+        let instruction_bits = self.get_register(IR) as u32;
+        let (instruction, queue) = decompose_instruction(instruction_bits);
+        self.micro_op_queue = VecDeque::from(queue);
+        self.decode_counter = self.decode_counter.wrapping_add(1);
+        log_microop_debug!(
+            "decode",
+            "#{}: {:032b} | {instruction}",
+            self.decode_counter,
+            instruction_bits
+        );
         MicroOpResponse::default()
     }
 
     fn mo_alu_add(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
-        self.set_register(rd, value1.wrapping_add(value2));
+        let result = value1.wrapping_add(value2);
+        self.set_register(rd, result);
+        log_microop_debug!(
+            "alu_add",
+            "{rd}({result}) = {rs1}({value1}) + {rs2}({value2})"
+        );
         MicroOpResponse::default()
     }
 
     fn mo_register_load_imm(&mut self, register: CPUReg, imm: u64) -> MicroOpResponse {
         self.set_register(register, imm);
+        log_microop_debug!("register_load_imm", "{register} ← {imm}");
         MicroOpResponse::default()
     }
 }

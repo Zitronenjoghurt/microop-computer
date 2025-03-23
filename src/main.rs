@@ -5,12 +5,16 @@ use crate::compiler::Compiler;
 use crate::computer::components::cpu::registers::CPUReg::*;
 use crate::computer::components::cpu::registers::CPURegistersAccessTrait;
 use crate::computer::Computer;
+use crate::logging::initialize_logging;
 
 mod compiler;
 mod computer;
+mod logging;
 mod utils;
 
 fn main() {
+    initialize_logging();
+
     let program = Compiler::new()
         .data("lb_data", vec![17])
         .lb_label(X1, X0, "lb_data")
