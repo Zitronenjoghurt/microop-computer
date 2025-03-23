@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 mod label_reference;
 pub mod layers;
-mod program;
+pub mod program;
 
 #[derive(Debug, Default)]
 pub struct Compiler {

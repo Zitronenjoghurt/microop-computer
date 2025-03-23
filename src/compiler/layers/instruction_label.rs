@@ -1,5 +1,5 @@
 use crate::compiler::layers::instructions::InstructionLayer;
-use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg;
 
 pub trait InstructionLabelLayer: InstructionLayer {
     fn lb_label(mut self, rd: CPUReg, rs1: CPUReg, data_label: &str) -> Self {

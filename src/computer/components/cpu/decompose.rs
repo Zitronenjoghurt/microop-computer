@@ -1,5 +1,6 @@
 use crate::computer::components::cpu::micro_op::MicroOp;
-use crate::computer::components::cpu::registers::{CPUReg, CPUReg::*};
+use crate::computer::components::cpu::registers::reg::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg::*;
 use crate::computer::instructions::Instruction;
 
 pub fn decompose_instruction(instruction_bits: u32) -> (Instruction, Vec<MicroOp>) {

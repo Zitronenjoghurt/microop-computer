@@ -1,4 +1,4 @@
-use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg;
 use crate::computer::instructions::decode::decode_instruction;
 use crate::computer::instructions::encode::encode_instruction;
 use std::fmt::Display;

@@ -1,4 +1,5 @@
-use crate::computer::components::cpu::registers::{CPUReg, CPUReg::*};
+use crate::computer::components::cpu::registers::reg::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg::*;
 use std::collections::VecDeque;
 
 #[derive(Debug, Default, PartialEq)]

@@ -2,14 +2,17 @@ use crate::computer::address::Address;
 use crate::computer::components::bus::owner::BusOwner;
 use crate::computer::components::bus::status::BusStatus;
 use crate::computer::components::bus::Bus;
+use crate::computer::components::cpu::builder::CPUBuilder;
 use crate::computer::components::cpu::decompose::decompose_instruction;
 use crate::computer::components::cpu::micro_op::{MicroOp, MicroOpResponse};
-use crate::computer::components::cpu::registers::CPUReg::IR;
-use crate::computer::components::cpu::registers::{CPUReg, CPURegisters, CPURegistersAccessTrait};
+use crate::computer::components::cpu::registers::{CPURegisters, CPURegistersAccessTrait};
 use crate::log_microop_debug;
 use log::{debug, trace};
+use registers::reg::CPUReg;
+use registers::reg::CPUReg::IR;
 use std::collections::VecDeque;
 
+mod builder;
 mod decompose;
 mod micro_op;
 pub mod registers;
@@ -25,6 +28,10 @@ pub struct CPU {
 impl CPU {
     pub fn new() -> CPU {
         CPU::default()
+    }
+
+    pub fn builder() -> CPUBuilder {
+        CPUBuilder::new()
     }
 
     pub fn tick(&mut self, bus: &mut Bus) -> bool {
@@ -210,5 +217,9 @@ impl CPURegistersAccessTrait for CPU {
 
     fn get_registers_mut(&mut self) -> &mut CPURegisters {
         &mut self.registers
+    }
+
+    fn set_registers(&mut self, registers: CPURegisters) {
+        self.registers.set_registers(registers);
     }
 }

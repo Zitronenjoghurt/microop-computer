@@ -2,14 +2,16 @@ use crate::compiler::layers::instruction_label::InstructionLabelLayer;
 use crate::compiler::layers::instructions::InstructionLayer;
 use crate::compiler::layers::program_builder::ProgramBuilderLayer;
 use crate::compiler::Compiler;
-use crate::computer::components::cpu::registers::CPUReg::*;
 use crate::computer::components::cpu::registers::CPURegistersAccessTrait;
 use crate::computer::Computer;
 use crate::logging::initialize_logging;
+use computer::components::cpu::registers::reg::CPUReg::*;
 
 mod compiler;
 mod computer;
 mod logging;
+#[cfg(test)]
+mod tests;
 mod utils;
 
 fn main() {

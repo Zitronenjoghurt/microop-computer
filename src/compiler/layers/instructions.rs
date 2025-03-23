@@ -1,5 +1,5 @@
 use crate::compiler::layers::program_builder::ProgramBuilderLayer;
-use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg;
 use crate::computer::instructions::Instruction;
 
 pub trait InstructionLayer: ProgramBuilderLayer {

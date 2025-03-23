@@ -1,4 +1,4 @@
-use crate::computer::components::cpu::registers::CPUReg;
+use crate::computer::components::cpu::registers::reg::CPUReg;
 use crate::computer::instructions::Instruction;
 
 pub fn encode_instruction(instruction: &Instruction) -> u32 {

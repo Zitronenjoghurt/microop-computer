@@ -1,3 +1,7 @@
+[![Test](https://github.com/Zitronenjoghurt/microop-computer/actions/workflows/test.yaml/badge.svg)](https://github.com/Zitronenjoghurt/microop-computer/actions/workflows/test.yaml)
+[![codecov](https://codecov.io/gh/Zitronenjoghurt/microop-computer/graph/badge.svg?token=UM6T22YO17)](https://codecov.io/gh/Zitronenjoghurt/microop-computer)
+![](https://tokei.rs/b1/github/Zitronenjoghurt/microop-computer?category=code&type=Rust&logo=https://simpleicons.org/icons/rust.svg)
+
 # microop-computer
 
 A CPU emulator based on micro operations.
