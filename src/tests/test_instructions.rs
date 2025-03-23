@@ -31,6 +31,26 @@ fn test_add(
     assert!(!computer.cpu.get_subtract());
 }
 
+#[rstest]
+#[case::nz_nc(1337, 1235, 102, false, false)]
+#[case::nz_c(1, u64::MAX, 2, false, true)]
+#[case::z_nc(513, 513, 0, true, false)]
+fn test_sub(
+    #[case] a: u64,
+    #[case] b: u64,
+    #[case] result: u64,
+    #[case] zero: bool,
+    #[case] carry: bool,
+) {
+    let cpu = CPU::builder().x1(a).x2(b).build();
+    let program = Compiler::new().sub(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+    assert_eq!(computer.cpu.get_zero(), zero);
+    assert_eq!(computer.cpu.get_carry(), carry);
+    assert!(computer.cpu.get_subtract());
+}
+
 #[test]
 fn test_lb() {
     let program = Compiler::new()

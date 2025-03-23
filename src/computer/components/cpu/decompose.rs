@@ -7,6 +7,7 @@ pub fn decompose_instruction(instruction_bits: u32) -> (Instruction, Vec<MicroOp
     let instruction = Instruction::decode(instruction_bits);
     let queue = match instruction {
         Instruction::Add(rd, rs1, rs2) => decompose_add(rd, rs1, rs2),
+        Instruction::Sub(rd, rs1, rs2) => decompose_sub(rd, rs1, rs2),
         Instruction::Lb(rd, rs1, imm) => decompose_lb(rd, rs1, imm),
         Instruction::ECall => vec![MicroOp::Halt],
         Instruction::EBreak => vec![MicroOp::Halt],
@@ -17,6 +18,10 @@ pub fn decompose_instruction(instruction_bits: u32) -> (Instruction, Vec<MicroOp
 // BASE INTEGER INSTRUCTIONS
 fn decompose_add(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
     vec![MicroOp::ALUAdd(rd, rs1, rs2)]
+}
+
+fn decompose_sub(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
+    vec![MicroOp::ALUSub(rd, rs1, rs2)]
 }
 
 // LOAD INSTRUCTIONS

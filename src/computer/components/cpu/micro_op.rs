@@ -28,6 +28,7 @@ pub enum MicroOp {
     // ALU operations
     /// rd, rs1, rs2
     ALUAdd(CPUReg, CPUReg, CPUReg),
+    ALUSub(CPUReg, CPUReg, CPUReg),
 
     // Register operations
     RegisterLoadImm(CPUReg, u64),

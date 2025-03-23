@@ -21,6 +21,7 @@ fn decode_r(instruction: u32) -> Instruction {
 
     match (funct3, funct7) {
         (0x0, 0x00) => Instruction::Add(rd, rs1, rs2),
+        (0x0, 0x20) => Instruction::Sub(rd, rs1, rs2),
         _ => unimplemented!(),
     }
 }
