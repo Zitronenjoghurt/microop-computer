@@ -1,4 +1,5 @@
 use crate::computer::components::cpu::registers::builder::CPURegistersBuilderTrait;
+use crate::computer::components::cpu::registers::flags::CPUFlagsAccessTrait;
 use crate::computer::components::cpu::registers::{CPURegisters, CPURegistersAccessTrait};
 use crate::computer::components::cpu::CPU;
 
@@ -30,6 +31,16 @@ impl CPURegistersAccessTrait for CPUBuilder {
 
     fn set_registers(&mut self, registers: CPURegisters) {
         self.registers.set_registers(registers);
+    }
+}
+
+impl CPUFlagsAccessTrait for CPUBuilder {
+    fn get_flags(&self) -> u64 {
+        self.registers.get_flags()
+    }
+
+    fn set_flags(&mut self, value: u64) {
+        self.registers.set_flags(value);
     }
 }
 

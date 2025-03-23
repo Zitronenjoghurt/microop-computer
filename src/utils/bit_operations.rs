@@ -27,3 +27,17 @@ pub fn construct_u64_from_data(data: &[u8], offset: usize) -> u64 {
     ];
     construct_u64(bytes)
 }
+
+/// Bits are indexed right to left starting from 0
+pub fn get_bit_u64(value: u64, bit_index: usize) -> bool {
+    (value >> bit_index) & 1 == 1
+}
+
+/// Bits are indexed right to left starting from 0
+pub fn set_bit_u64(value: u64, bit_index: usize, bit: bool) -> u64 {
+    if bit {
+        value | (1 << bit_index)
+    } else {
+        value & !(1 << bit_index)
+    }
+}

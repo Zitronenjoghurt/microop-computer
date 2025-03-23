@@ -1,3 +1,4 @@
+use crate::computer::components::cpu::registers::flags::CPUFlagsAccessTrait;
 use crate::computer::components::cpu::registers::reg::CPUReg;
 use crate::computer::components::cpu::registers::{CPURegisters, CPURegistersAccessTrait};
 
@@ -30,9 +31,19 @@ impl CPURegistersAccessTrait for CPURegistersBuilder {
     }
 }
 
+impl CPUFlagsAccessTrait for CPURegistersBuilder {
+    fn get_flags(&self) -> u64 {
+        self.registers.get_flags()
+    }
+
+    fn set_flags(&mut self, value: u64) {
+        self.registers.set_flags(value);
+    }
+}
+
 impl CPURegistersBuilderTrait for CPURegistersBuilder {}
 
-pub trait CPURegistersBuilderTrait: CPURegistersAccessTrait + Sized {
+pub trait CPURegistersBuilderTrait: CPURegistersAccessTrait + CPUFlagsAccessTrait + Sized {
     fn x0(mut self, value: u64) -> Self {
         self.get_registers_mut().set_register(CPUReg::X0, value);
         self
@@ -200,6 +211,26 @@ pub trait CPURegistersBuilderTrait: CPURegistersAccessTrait + Sized {
 
     fn ir(mut self, value: u64) -> Self {
         self.get_registers_mut().set_register(CPUReg::IR, value);
+        self
+    }
+
+    fn f(mut self, value: u64) -> Self {
+        self.get_registers_mut().set_register(CPUReg::F, value);
+        self
+    }
+
+    fn zero(mut self, value: bool) -> Self {
+        self.set_zero(value);
+        self
+    }
+
+    fn carry(mut self, value: bool) -> Self {
+        self.set_carry(value);
+        self
+    }
+
+    fn subtract(mut self, value: bool) -> Self {
+        self.set_subtract(value);
         self
     }
 

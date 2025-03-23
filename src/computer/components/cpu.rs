@@ -5,6 +5,7 @@ use crate::computer::components::bus::Bus;
 use crate::computer::components::cpu::builder::CPUBuilder;
 use crate::computer::components::cpu::decompose::decompose_instruction;
 use crate::computer::components::cpu::micro_op::{MicroOp, MicroOpResponse};
+use crate::computer::components::cpu::registers::flags::CPUFlagsAccessTrait;
 use crate::computer::components::cpu::registers::{CPURegisters, CPURegistersAccessTrait};
 use crate::log_microop_debug;
 use log::{debug, trace};
@@ -194,8 +195,12 @@ impl CPU {
     fn mo_alu_add(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
-        let result = value1.wrapping_add(value2);
+        let (result, carry) = value1.overflowing_add(value2);
+        let zero = result == 0;
         self.set_register(rd, result);
+        self.set_carry(carry);
+        self.set_zero(zero);
+        self.set_subtract(false);
         log_microop_debug!(
             "alu_add",
             "{rd}({result}) = {rs1}({value1}) + {rs2}({value2})"
@@ -221,5 +226,15 @@ impl CPURegistersAccessTrait for CPU {
 
     fn set_registers(&mut self, registers: CPURegisters) {
         self.registers.set_registers(registers);
+    }
+}
+
+impl CPUFlagsAccessTrait for CPU {
+    fn get_flags(&self) -> u64 {
+        self.registers.get_flags()
+    }
+
+    fn set_flags(&mut self, value: u64) {
+        self.registers.set_flags(value);
     }
 }

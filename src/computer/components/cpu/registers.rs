@@ -1,12 +1,14 @@
+use crate::computer::components::cpu::registers::flags::CPUFlagsAccessTrait;
 use reg::CPUReg;
 use std::fmt::{Display, Formatter};
 
 pub mod builder;
+pub mod flags;
 pub mod reg;
 
 #[derive(Debug, PartialEq)]
 pub struct CPURegisters {
-    registers: [u64; 42],
+    registers: [u64; 43],
 }
 
 impl CPURegisters {
@@ -29,9 +31,19 @@ impl CPURegistersAccessTrait for CPURegisters {
     }
 }
 
+impl CPUFlagsAccessTrait for CPURegisters {
+    fn get_flags(&self) -> u64 {
+        self.get_register(CPUReg::F)
+    }
+
+    fn set_flags(&mut self, value: u64) {
+        self.set_register(CPUReg::F, value);
+    }
+}
+
 impl Default for CPURegisters {
     fn default() -> Self {
-        Self { registers: [0; 42] }
+        Self { registers: [0; 43] }
     }
 }
 
@@ -59,10 +71,13 @@ impl Display for CPURegisters {
         }
 
         writeln!(f, "\nSpecial Registers:")?;
-        writeln!(f, "PC  : {}", self.registers[32])?;
-        writeln!(f, "IR  : {:032b}", self.registers[33] as u32)?;
+        writeln!(f, "PC  : {}", self.get_register(CPUReg::PC))?;
+        writeln!(f, "IR  : {:032b}", self.get_register(CPUReg::IR) as u32)?;
+        writeln!(f, "Z   : {}", if self.get_zero() { "✔" } else { "✘" })?;
+        writeln!(f, "C   : {}", if self.get_carry() { "✔" } else { "✘" })?;
+        writeln!(f, "S   : {}", if self.get_subtract() { "✔" } else { "✘" })?;
         for i in 0..8 {
-            let index = 34 + i;
+            let index = 35 + i;
             writeln!(f, "TMP{}: {}", i, self.registers[index])?;
         }
 
