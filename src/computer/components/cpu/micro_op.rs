@@ -32,6 +32,9 @@ pub enum MicroOp {
     ALUOr(CPUReg, CPUReg, CPUReg),
     ALUSub(CPUReg, CPUReg, CPUReg),
     ALUXor(CPUReg, CPUReg, CPUReg),
+    ALUSll(CPUReg, CPUReg, CPUReg),
+    ALUSrl(CPUReg, CPUReg, CPUReg),
+    ALUSra(CPUReg, CPUReg, CPUReg),
 
     // Register operations
     RegisterLoadImm(CPUReg, u64),

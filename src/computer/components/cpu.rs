@@ -66,6 +66,9 @@ impl CPU {
             MicroOp::ALUOr(rd, rs1, rs2) => self.mo_alu_or(rd, rs1, rs2),
             MicroOp::ALUSub(rd, rs1, rs2) => self.mo_alu_sub(rd, rs1, rs2),
             MicroOp::ALUXor(rd, rs1, rs2) => self.mo_alu_xor(rd, rs1, rs2),
+            MicroOp::ALUSll(rd, rs1, rs2) => self.mo_alu_shift_left_logical(rd, rs1, rs2),
+            MicroOp::ALUSrl(rd, rs1, rs2) => self.mo_alu_shift_right_logical(rd, rs1, rs2),
+            MicroOp::ALUSra(rd, rs1, rs2) => self.mo_alu_shift_right_arithmetic(rd, rs1, rs2),
             MicroOp::RegisterLoadImm(register, imm) => self.mo_register_load_imm(register, imm),
         };
 
@@ -282,6 +285,57 @@ impl CPU {
         log_microop_debug!(
             "alu_xor",
             "{rd}({result}) = {rs1}({value1}) ^ {rs2}({value2})"
+        );
+        MicroOpResponse::default()
+    }
+
+    fn mo_alu_shift_left_logical(
+        &mut self,
+        rd: CPUReg,
+        rs1: CPUReg,
+        rs2: CPUReg,
+    ) -> MicroOpResponse {
+        let value = self.get_register(rs1);
+        let shift = self.get_register(rs2) & 0b11_1111;
+        let result = value << shift;
+        self.set_register(rd, result);
+        log_microop_debug!(
+            "alu_sll",
+            "{rd}({result}) = {rs1}({value}) << {rs2}({shift})"
+        );
+        MicroOpResponse::default()
+    }
+
+    fn mo_alu_shift_right_logical(
+        &mut self,
+        rd: CPUReg,
+        rs1: CPUReg,
+        rs2: CPUReg,
+    ) -> MicroOpResponse {
+        let value = self.get_register(rs1);
+        let shift = self.get_register(rs2) & 0b11_1111;
+        let result = value >> shift;
+        self.set_register(rd, result);
+        log_microop_debug!(
+            "alu_srl",
+            "{rd}({result}) = {rs1}({value}) >> {rs2}({shift})"
+        );
+        MicroOpResponse::default()
+    }
+
+    fn mo_alu_shift_right_arithmetic(
+        &mut self,
+        rd: CPUReg,
+        rs1: CPUReg,
+        rs2: CPUReg,
+    ) -> MicroOpResponse {
+        let value = self.get_register(rs1);
+        let shift = self.get_register(rs2) & 0b11_1111;
+        let result = (value as i64 >> shift) as u64;
+        self.set_register(rd, result);
+        log_microop_debug!(
+            "alu_sra",
+            "{rd}({result}) = {rs1}({value}) >>* {rs2}({shift})"
         );
         MicroOpResponse::default()
     }

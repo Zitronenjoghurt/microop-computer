@@ -11,6 +11,9 @@ pub fn decompose_instruction(instruction_bits: u32) -> (Instruction, Vec<MicroOp
         Instruction::Or(rd, rs1, rs2) => decompose_or(rd, rs1, rs2),
         Instruction::Sub(rd, rs1, rs2) => decompose_sub(rd, rs1, rs2),
         Instruction::Xor(rd, rs1, imm) => decompose_xor(rd, rs1, imm),
+        Instruction::Sll(rd, rs1, rs2) => decompose_sll(rd, rs1, rs2),
+        Instruction::Srl(rd, rs1, rs2) => decompose_srl(rd, rs1, rs2),
+        Instruction::Sra(rd, rs1, rs2) => decompose_sra(rd, rs1, rs2),
         Instruction::Lb(rd, rs1, imm) => decompose_lb(rd, rs1, imm),
         Instruction::ECall => vec![MicroOp::Halt],
         Instruction::EBreak => vec![MicroOp::Halt],
@@ -37,6 +40,18 @@ fn decompose_sub(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
 
 fn decompose_xor(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
     vec![MicroOp::ALUXor(rd, rs1, rs2)]
+}
+
+fn decompose_sll(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
+    vec![MicroOp::ALUSll(rd, rs1, rs2)]
+}
+
+fn decompose_srl(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
+    vec![MicroOp::ALUSrl(rd, rs1, rs2)]
+}
+
+fn decompose_sra(rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Vec<MicroOp> {
+    vec![MicroOp::ALUSra(rd, rs1, rs2)]
 }
 
 // LOAD INSTRUCTIONS

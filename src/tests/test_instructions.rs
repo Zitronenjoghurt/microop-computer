@@ -104,12 +104,42 @@ fn test_xor(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: b
     assert!(!computer.cpu.get_subtract());
 }
 
+#[rstest]
+#[case(0b1010, 2, 0b101000)]
+#[case(120, 1, 240)]
+fn test_sll(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
+    let cpu = CPU::builder().x1(value).x2(shift).build();
+    let program = Compiler::new().sll(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+}
+
+#[rstest]
+#[case(0b1010, 2, 0b10)]
+#[case(120, 1, 60)]
+fn test_srl(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
+    let cpu = CPU::builder().x1(value).x2(shift).build();
+    let program = Compiler::new().srl(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+}
+
+#[rstest]
+#[case(-2, 1, -1)]
+#[case(-1280, 3, -160)]
+fn test_sra(#[case] value: i64, #[case] shift: u64, #[case] result: i64) {
+    let cpu = CPU::builder().x1(value as u64).x2(shift).build();
+    let program = Compiler::new().sra(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result as u64);
+}
+
 #[test]
 fn test_lb() {
     let program = Compiler::new()
         .data("test", vec![69])
         .lb_label(X1, X0, "test")
         .compile();
-    let computer = setup_and_run(program, 15);
+    let computer = setup_and_run(program, 16);
     assert_eq!(computer.cpu.get_register(X1), 69);
 }

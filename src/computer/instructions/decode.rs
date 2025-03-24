@@ -25,6 +25,9 @@ fn decode_r(instruction: u32, opcode: u8) -> Instruction {
         (0x6, 0x00, 0b011_0011) => Instruction::Or(rd, rs1, rs2),
         (0x0, 0x20, 0b011_0011) => Instruction::Sub(rd, rs1, rs2),
         (0x4, 0x00, 0b011_0011) => Instruction::Xor(rd, rs1, rs2),
+        (0x1, 0x00, 0b011_0011) => Instruction::Sll(rd, rs1, rs2),
+        (0x5, 0x00, 0b011_0011) => Instruction::Srl(rd, rs1, rs2),
+        (0x5, 0x20, 0b011_0011) => Instruction::Sra(rd, rs1, rs2),
         _ => unimplemented!(),
     }
 }
