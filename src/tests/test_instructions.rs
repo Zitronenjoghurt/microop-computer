@@ -23,7 +23,7 @@ fn test_add(
 ) {
     let cpu = CPU::builder().x1(a).x2(b).build();
     let program = Compiler::new().add(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
     assert_eq!(computer.cpu.get_zero(), zero);
     assert_eq!(computer.cpu.get_carry(), carry);
@@ -41,7 +41,7 @@ fn test_and(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: b
         .subtract(true)
         .build();
     let program = Compiler::new().and(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
     assert_eq!(computer.cpu.get_zero(), zero);
     assert!(!computer.cpu.get_carry());
@@ -59,7 +59,7 @@ fn test_or(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: bo
         .subtract(true)
         .build();
     let program = Compiler::new().or(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
     assert_eq!(computer.cpu.get_zero(), zero);
     assert!(!computer.cpu.get_carry());
@@ -79,7 +79,7 @@ fn test_sub(
 ) {
     let cpu = CPU::builder().x1(a).x2(b).build();
     let program = Compiler::new().sub(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
     assert_eq!(computer.cpu.get_zero(), zero);
     assert_eq!(computer.cpu.get_carry(), carry);
@@ -97,7 +97,7 @@ fn test_xor(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: b
         .subtract(true)
         .build();
     let program = Compiler::new().xor(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
     assert_eq!(computer.cpu.get_zero(), zero);
     assert!(!computer.cpu.get_carry());
@@ -110,7 +110,7 @@ fn test_xor(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: b
 fn test_sll(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
     let cpu = CPU::builder().x1(value).x2(shift).build();
     let program = Compiler::new().sll(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
 }
 
@@ -120,7 +120,7 @@ fn test_sll(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
 fn test_srl(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
     let cpu = CPU::builder().x1(value).x2(shift).build();
     let program = Compiler::new().srl(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result);
 }
 
@@ -130,7 +130,7 @@ fn test_srl(#[case] value: u64, #[case] shift: u64, #[case] result: u64) {
 fn test_sra(#[case] value: i64, #[case] shift: u64, #[case] result: i64) {
     let cpu = CPU::builder().x1(value as u64).x2(shift).build();
     let program = Compiler::new().sra(X3, X1, X2).compile();
-    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    let computer = setup_and_run_custom_cpu(cpu, program, 7);
     assert_eq!(computer.cpu.get_register(X3), result as u64);
 }
 
@@ -140,6 +140,6 @@ fn test_lb() {
         .data("test", vec![69])
         .lb_label(X1, X0, "test")
         .compile();
-    let computer = setup_and_run(program, 16);
+    let computer = setup_and_run(program, 13);
     assert_eq!(computer.cpu.get_register(X1), 69);
 }

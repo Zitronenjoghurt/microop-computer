@@ -1,4 +1,5 @@
 use crate::computer::components::cpu::registers::flags::CPUFlagsAccessTrait;
+use log::debug;
 use reg::CPUReg;
 use std::fmt::{Display, Formatter};
 
@@ -58,6 +59,14 @@ pub trait CPURegistersAccessTrait {
     }
 
     fn set_register(&mut self, reg: CPUReg, value: u64) {
+        // Hardwired writing to IR => speed up fetch/decode cycle
+        // On IR writes, the instruction will be analyzed for compressed format and PC will be incremented
+        if reg == CPUReg::IR {
+            // ToDo: Analyze instruction if its compressed format => set new flag
+            self.set_register(CPUReg::PC, self.get_register(CPUReg::PC).wrapping_add(4));
+            debug!(target: "cpu", "IR write detected, PC hardwired increment by 4");
+        }
+
         let index = reg as usize;
         self.get_registers_mut().registers[index] = value;
     }

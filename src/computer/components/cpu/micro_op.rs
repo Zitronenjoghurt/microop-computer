@@ -48,8 +48,6 @@ impl MicroOp {
             Self::BusSetRead,
             Self::BusReadWord(IR),
             Self::BusRelease,
-            Self::RegisterLoadImm(TMP0, 4),
-            Self::ALUAdd(PC, PC, TMP0),
             Self::Decode,
         ])
     }
