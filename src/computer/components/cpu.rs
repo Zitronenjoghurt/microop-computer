@@ -208,7 +208,10 @@ impl CPU {
     fn mo_alu_add(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
-        let (result, carry) = value1.overflowing_add(value2);
+        let (mut result, carry) = value1.overflowing_add(value2);
+        if carry {
+            result = u64::MAX;
+        }
         self.set_register(rd, result);
         self.set_carry(carry);
         self.set_zero(result == 0);
@@ -253,7 +256,10 @@ impl CPU {
     fn mo_alu_sub(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
-        let (result, carry) = value1.overflowing_sub(value2);
+        let (mut result, carry) = value1.overflowing_sub(value2);
+        if carry {
+            result = 0;
+        }
         self.set_register(rd, result);
         self.set_carry(carry);
         self.set_zero(result == 0);

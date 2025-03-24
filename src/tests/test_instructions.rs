@@ -12,9 +12,8 @@ use rstest::rstest;
 
 #[rstest]
 #[case::nz_nc(230, 1337, 1567, false, false)]
-#[case::nz_c(u64::MAX, 1337, 1336, false, true)]
+#[case::nz_c(u64::MAX, 1337, u64::MAX, false, true)]
 #[case::z_nc(0, 0, 0, true, false)]
-#[case::z_c(u64::MAX, 1, 0, true, true)]
 fn test_add(
     #[case] a: u64,
     #[case] b: u64,
@@ -69,8 +68,8 @@ fn test_or(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: bo
 
 #[rstest]
 #[case::nz_nc(1337, 1235, 102, false, false)]
-#[case::nz_c(1, u64::MAX, 2, false, true)]
 #[case::z_nc(513, 513, 0, true, false)]
+#[case::z_c(1, u64::MAX, 0, true, true)]
 fn test_sub(
     #[case] a: u64,
     #[case] b: u64,
