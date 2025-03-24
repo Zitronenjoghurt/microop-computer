@@ -6,12 +6,12 @@ pub fn decode_instruction(instruction: u32) -> Instruction {
 
     match opcode {
         0b000_0011 | 0b111_0011 => decode_i(instruction, opcode),
-        0b011_0011 => decode_r(instruction),
+        0b011_0011 => decode_r(instruction, opcode),
         _ => unimplemented!(),
     }
 }
 
-fn decode_r(instruction: u32) -> Instruction {
+fn decode_r(instruction: u32, opcode: u8) -> Instruction {
     let funct3 = get_funct3(instruction);
     let funct7 = get_funct7(instruction);
 
@@ -19,9 +19,12 @@ fn decode_r(instruction: u32) -> Instruction {
     let rs1 = get_rs1(instruction);
     let rs2 = get_rs2(instruction);
 
-    match (funct3, funct7) {
-        (0x0, 0x00) => Instruction::Add(rd, rs1, rs2),
-        (0x0, 0x20) => Instruction::Sub(rd, rs1, rs2),
+    match (funct3, funct7, opcode) {
+        (0x0, 0x00, 0b011_0011) => Instruction::Add(rd, rs1, rs2),
+        (0x7, 0x00, 0b011_0011) => Instruction::And(rd, rs1, rs2),
+        (0x6, 0x00, 0b011_0011) => Instruction::Or(rd, rs1, rs2),
+        (0x0, 0x20, 0b011_0011) => Instruction::Sub(rd, rs1, rs2),
+        (0x4, 0x00, 0b011_0011) => Instruction::Xor(rd, rs1, rs2),
         _ => unimplemented!(),
     }
 }

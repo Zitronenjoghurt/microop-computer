@@ -10,7 +10,10 @@ mod encode;
 pub enum Instruction {
     /// rd, rs1, rs2
     Add(CPUReg, CPUReg, CPUReg),
+    And(CPUReg, CPUReg, CPUReg),
+    Or(CPUReg, CPUReg, CPUReg),
     Sub(CPUReg, CPUReg, CPUReg),
+    Xor(CPUReg, CPUReg, CPUReg),
     /// rd, rs1, imm
     Lb(CPUReg, CPUReg, u64),
     ECall,
@@ -41,7 +44,10 @@ impl Display for Instruction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Instruction::Add(rd, rs1, rs2) => write!(f, "ADD {rd} = {rs1} + {rs2}"),
+            Instruction::And(rd, rs1, rs2) => write!(f, "AND {rd} = {rs1} & {rs2}"),
+            Instruction::Or(rd, rs1, rs2) => write!(f, "OR {rd} = {rs1} | {rs2}"),
             Instruction::Sub(rd, rs1, rs2) => write!(f, "SUB {rd} = {rs1} - {rs2}"),
+            Instruction::Xor(rd, rs1, rs2) => write!(f, "XOR {rd} = {rs1} ^ {rs2}"),
             Instruction::Lb(rd, rs1, imm) => write!(f, "LB {rd} = M[{rs1} + {imm}]"),
             Instruction::ECall => write!(f, "ECALL"),
             Instruction::EBreak => write!(f, "EBREAK"),

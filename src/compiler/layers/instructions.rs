@@ -8,8 +8,23 @@ pub trait InstructionLayer: ProgramBuilderLayer {
         self
     }
 
+    fn and(mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Self {
+        self.add_instruction(Instruction::And(rd, rs1, rs2));
+        self
+    }
+
+    fn or(mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Self {
+        self.add_instruction(Instruction::Or(rd, rs1, rs2));
+        self
+    }
+
     fn sub(mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Self {
         self.add_instruction(Instruction::Sub(rd, rs1, rs2));
+        self
+    }
+
+    fn xor(mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> Self {
+        self.add_instruction(Instruction::Xor(rd, rs1, rs2));
         self
     }
 

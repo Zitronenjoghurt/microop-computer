@@ -32,6 +32,42 @@ fn test_add(
 }
 
 #[rstest]
+#[case::nz(0b1010, 0b1111, 0b1010, false)]
+#[case::z(0, 0, 0, true)]
+fn test_and(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: bool) {
+    let cpu = CPU::builder()
+        .x1(a)
+        .x2(b)
+        .carry(true)
+        .subtract(true)
+        .build();
+    let program = Compiler::new().and(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+    assert_eq!(computer.cpu.get_zero(), zero);
+    assert!(!computer.cpu.get_carry());
+    assert!(!computer.cpu.get_subtract());
+}
+
+#[rstest]
+#[case::nz(0b1010, 0b1110, 0b1110, false)]
+#[case::z(0, 0, 0, true)]
+fn test_or(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: bool) {
+    let cpu = CPU::builder()
+        .x1(a)
+        .x2(b)
+        .carry(true)
+        .subtract(true)
+        .build();
+    let program = Compiler::new().or(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+    assert_eq!(computer.cpu.get_zero(), zero);
+    assert!(!computer.cpu.get_carry());
+    assert!(!computer.cpu.get_subtract());
+}
+
+#[rstest]
 #[case::nz_nc(1337, 1235, 102, false, false)]
 #[case::nz_c(1, u64::MAX, 2, false, true)]
 #[case::z_nc(513, 513, 0, true, false)]
@@ -49,6 +85,24 @@ fn test_sub(
     assert_eq!(computer.cpu.get_zero(), zero);
     assert_eq!(computer.cpu.get_carry(), carry);
     assert!(computer.cpu.get_subtract());
+}
+
+#[rstest]
+#[case::nz(0b1010, 0b1110, 0b0100, false)]
+#[case::z(0, 0, 0, true)]
+fn test_xor(#[case] a: u64, #[case] b: u64, #[case] result: u64, #[case] zero: bool) {
+    let cpu = CPU::builder()
+        .x1(a)
+        .x2(b)
+        .carry(true)
+        .subtract(true)
+        .build();
+    let program = Compiler::new().xor(X3, X1, X2).compile();
+    let computer = setup_and_run_custom_cpu(cpu, program, 9);
+    assert_eq!(computer.cpu.get_register(X3), result);
+    assert_eq!(computer.cpu.get_zero(), zero);
+    assert!(!computer.cpu.get_carry());
+    assert!(!computer.cpu.get_subtract());
 }
 
 #[test]

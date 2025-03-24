@@ -62,7 +62,10 @@ impl CPU {
             MicroOp::BusSetWriteDoubleWord => self.mo_bus_set_write_double_word(bus),
             MicroOp::Decode => self.mo_decode(),
             MicroOp::ALUAdd(rd, rs1, rs2) => self.mo_alu_add(rd, rs1, rs2),
+            MicroOp::ALUAnd(rd, rs1, rs2) => self.mo_alu_and(rd, rs1, rs2),
+            MicroOp::ALUOr(rd, rs1, rs2) => self.mo_alu_or(rd, rs1, rs2),
             MicroOp::ALUSub(rd, rs1, rs2) => self.mo_alu_sub(rd, rs1, rs2),
+            MicroOp::ALUXor(rd, rs1, rs2) => self.mo_alu_xor(rd, rs1, rs2),
             MicroOp::RegisterLoadImm(register, imm) => self.mo_register_load_imm(register, imm),
         };
 
@@ -206,10 +209,9 @@ impl CPU {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
         let (result, carry) = value1.overflowing_add(value2);
-        let zero = result == 0;
         self.set_register(rd, result);
         self.set_carry(carry);
-        self.set_zero(zero);
+        self.set_zero(result == 0);
         self.set_subtract(false);
         log_microop_debug!(
             "alu_add",
@@ -218,18 +220,62 @@ impl CPU {
         MicroOpResponse::default()
     }
 
+    fn mo_alu_and(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
+        let value1 = self.get_register(rs1);
+        let value2 = self.get_register(rs2);
+        let result = value1 & value2;
+        self.set_register(rd, result);
+        self.set_carry(false);
+        self.set_zero(result == 0);
+        self.set_subtract(false);
+        log_microop_debug!(
+            "alu_and",
+            "{rd}({result}) = {rs1}({value1}) & {rs2}({value2})"
+        );
+        MicroOpResponse::default()
+    }
+
+    fn mo_alu_or(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
+        let value1 = self.get_register(rs1);
+        let value2 = self.get_register(rs2);
+        let result = value1 | value2;
+        self.set_register(rd, result);
+        self.set_carry(false);
+        self.set_zero(result == 0);
+        self.set_subtract(false);
+        log_microop_debug!(
+            "alu_or",
+            "{rd}({result}) = {rs1}({value1}) | {rs2}({value2})"
+        );
+        MicroOpResponse::default()
+    }
+
     fn mo_alu_sub(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
         let value1 = self.get_register(rs1);
         let value2 = self.get_register(rs2);
         let (result, carry) = value1.overflowing_sub(value2);
-        let zero = result == 0;
         self.set_register(rd, result);
         self.set_carry(carry);
-        self.set_zero(zero);
+        self.set_zero(result == 0);
         self.set_subtract(true);
         log_microop_debug!(
             "alu_sub",
             "{rd}({result}) = {rs1}({value1}) - {rs2}({value2})"
+        );
+        MicroOpResponse::default()
+    }
+
+    fn mo_alu_xor(&mut self, rd: CPUReg, rs1: CPUReg, rs2: CPUReg) -> MicroOpResponse {
+        let value1 = self.get_register(rs1);
+        let value2 = self.get_register(rs2);
+        let result = value1 ^ value2;
+        self.set_register(rd, result);
+        self.set_carry(false);
+        self.set_zero(result == 0);
+        self.set_subtract(false);
+        log_microop_debug!(
+            "alu_xor",
+            "{rd}({result}) = {rs1}({value1}) ^ {rs2}({value2})"
         );
         MicroOpResponse::default()
     }
